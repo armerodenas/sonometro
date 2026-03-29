@@ -2,20 +2,58 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Sonómetro de Clase</title>
+
+<!-- ═══════════════════════════════════════
+     PWA MANIFEST (embebido)
+═══════════════════════════════════════ -->
+<script>
+const MANIFEST = {
+  name: "Sonómetro de Clase",
+  short_name: "Sonómetro",
+  description: "Sonómetro con puntos ClassDojo para clase de Primaria",
+  start_url: "./",
+  display: "standalone",
+  orientation: "landscape",
+  background_color: "#0f172a",
+  theme_color: "#6366f1",
+  lang: "es",
+  icons: [
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%230f172a'/%3E%3Ctext x='50%25' y='55%25' font-size='300' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%8E%A4%3C/text%3E%3C/svg%3E", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+  ]
+};
+const blob = new Blob([JSON.stringify(MANIFEST)], {type:'application/manifest+json'});
+const mUrl = URL.createObjectURL(blob);
+const link = document.createElement('link');
+link.rel='manifest'; link.href=mUrl;
+document.currentScript.parentNode.insertBefore(link, document.currentScript);
+</script>
+
+<!-- PWA meta tags -->
+<meta name="application-name" content="Sonómetro de Clase">
+<meta name="description" content="Sonómetro con puntos ClassDojo para clase de Primaria">
+<meta name="theme-color" content="#6366f1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sonómetro">
+
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --c1:#4ade80; --c2:#a3e635; --c3:#facc15; --c4:#fb923c; --c5:#f87171;
-    --bg:#0f172a; --card:#1e293b; --dojo:#6366f1;
+  :root{
+    --c1:#4ade80;--c2:#a3e635;--c3:#facc15;--c4:#fb923c;--c5:#f87171;
+    --bg:#0f172a;--card:#1e293b;--dojo:#6366f1;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{
-    font-family:'Nunito',sans-serif; background:var(--bg);
-    min-height:100vh; display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    overflow:hidden; user-select:none;
+    font-family:'Nunito',sans-serif;background:var(--bg);
+    min-height:100vh;min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    overflow:hidden;user-select:none;
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
   }
   .stars{position:fixed;inset:0;pointer-events:none;z-index:0;
     background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,.07) 0%,transparent 60%),
@@ -70,18 +108,14 @@
     border:1px solid rgba(99,102,241,.25);border-radius:22px;
     padding:clamp(12px,2vw,20px) clamp(14px,2.5vw,24px);
     display:flex;flex-direction:column;gap:12px;}
-
   .dojo-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
   .dojo-title{font-size:clamp(.8rem,1.8vw,1rem);font-weight:900;color:#818cf8;
     text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:7px;}
-
   .dojo-puntos-display{display:flex;align-items:baseline;gap:5px;
     font-size:clamp(1.6rem,4.5vw,2.8rem);font-weight:900;color:#e2e8f0;line-height:1;}
   .dojo-puntos-display .pts-label{font-size:.35em;color:#64748b;font-weight:700;}
 
-  /* Barra puntos */
   .dojo-barra-wrap{width:100%;position:relative;height:clamp(36px,5.5vw,52px);}
-
   .dojo-segmentos{position:absolute;inset:0;display:flex;border-radius:14px;overflow:hidden;
     border:1px solid rgba(255,255,255,.08);}
   .seg{flex:1;position:relative;border-right:2px solid rgba(15,23,42,.7);
@@ -106,7 +140,6 @@
     background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
     animation:shimmer 2.5s infinite;}
 
-  /* Leyenda */
   .dojo-leyenda{display:flex;gap:clamp(5px,1.2vw,10px);justify-content:center;flex-wrap:wrap;}
   .leyenda-item{display:flex;align-items:center;gap:5px;
     font-size:clamp(.6rem,1.1vw,.8rem);color:#94a3b8;font-weight:700;
@@ -115,7 +148,6 @@
   .leyenda-item.activo{color:#e2e8f0;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);}
   .leyenda-item .li-pts{color:var(--dojo);font-weight:900;}
 
-  /* Flotantes */
   .float-anim{position:fixed;pointer-events:none;z-index:999;
     font-size:2rem;font-weight:900;animation:floatUp .9s ease forwards;}
   @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}
@@ -147,7 +179,6 @@
     box-shadow:0 4px 20px rgba(99,102,241,.4);transition:all .2s;margin-top:4px;}
   .btn-modal:hover{transform:scale(1.05);}
 
-  /* Botones */
   .btn-wrap{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
   .btn{font-family:'Nunito',sans-serif;font-size:clamp(.82rem,1.7vw,.97rem);
     font-weight:700;padding:10px 22px;border-radius:999px;border:none;cursor:pointer;
@@ -196,7 +227,6 @@
     <div class="nivel-card" id="card-5" style="color:#f87171"><div class="ne">🤯</div><div class="nt">¡Nivel crítico!</div></div>
   </div>
 
-  <!-- CLASSDOJO SECTION -->
   <div class="dojo-section">
     <div class="dojo-header">
       <div class="dojo-title">🟣 ClassDojo · Puntos de clase</div>
@@ -205,21 +235,17 @@
         <span class="pts-label">/ 100 pts</span>
       </div>
     </div>
-
     <div class="dojo-barra-wrap">
-      <!-- Fondo segmentado -->
       <div class="dojo-segmentos">
         <div class="seg seg-0" id="seg-0"><span class="seg-icon">😞</span><span class="seg-label">0 pts</span></div>
         <div class="seg seg-1" id="seg-1"><span class="seg-icon">😐</span><span class="seg-label">1 pt</span></div>
         <div class="seg seg-2" id="seg-2"><span class="seg-icon">😊</span><span class="seg-label">2 pts</span></div>
         <div class="seg seg-3" id="seg-3"><span class="seg-icon">🌟</span><span class="seg-label">3 pts</span></div>
       </div>
-      <!-- Relleno -->
       <div class="dojo-barra-fill-wrap">
         <div class="dojo-barra-fill" id="dojoFill" style="width:50%;background:linear-gradient(90deg,#facc15,#a3e635)"></div>
       </div>
     </div>
-
     <div class="dojo-leyenda">
       <div class="leyenda-item" id="ley-0">😞 <span><span class="li-pts">0 pts</span> → 0–24</span></div>
       <div class="leyenda-item" id="ley-1">😐 <span><span class="li-pts">1 pt</span> → 25–49</span></div>
@@ -241,7 +267,6 @@
   <p class="permiso-msg" id="permisoMsg">⚠️ Debes permitir el acceso al micrófono en el navegador.</p>
 </div>
 
-<!-- Modal resultado -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div class="m-trophy" id="mTrophy">🏆</div>
@@ -254,20 +279,40 @@
 </div>
 
 <script>
-// ─── CONFIG ───────────────────────────
-const TICK_MS        = 500;
-const GAIN_SILENCIO  = 0.5;   // nivel 0 (silencio total)
-const GAIN_SUSURRO   = 0.25;  // nivel 1 (muy tranquilo)
-const DRAIN_NORMAL   = 0.1;   // nivel 2 (trabajo normal, casi neutro)
-const DRAIN_RUIDO    = 0.7;   // nivel 3
-const DRAIN_CRITICO  = 1.8;   // nivel 4
+// ─── SERVICE WORKER (embebido) ────────────────────────────────
+if('serviceWorker' in navigator){
+  const swCode=`
+    const CACHE='sonometro-v1';
+    const ASSETS=['/'];
+    self.addEventListener('install',e=>{
+      e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate',e=>{
+      e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch',e=>{
+      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('/'))));
+    });
+  `;
+  const swBlob=new Blob([swCode],{type:'text/javascript'});
+  const swUrl=URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
 
-// ─── ESTADO ───────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────
+const TICK_MS       = 500;
+const GAIN_SILENCIO = 0.5;
+const GAIN_SUSURRO  = 0.25;
+const DRAIN_NORMAL  = 0.1;
+const DRAIN_RUIDO   = 0.7;
+const DRAIN_CRITICO = 1.8;
+
+// ─── ESTADO ───────────────────────────────────────────────────
 let audioCtx=null,analyser=null,micStream=null,animFrame=null;
 let nivelActual=0,shakeTimeout=null;
-let puntos=50;
-let tickInterval=null;
-let activo=false;
+let puntos=50,tickInterval=null,activo=false;
 
 const niveles=[
   {min:0, max:12, emoji:'😴',label:'Silencio total',  color:'#4ade80',barColor:'#4ade80'},
@@ -284,28 +329,24 @@ function dojoColor(p){
   return 'linear-gradient(90deg,#f87171,#fb923c)';
 }
 function dojoResult(p){
-  if(p>=75) return{pts:3,emoji:'🌟',titulo:'¡Sobresaliente!',desc:'¡La clase ha trabajado genial! Os habéis ganado los 3 puntos.',trophy:'🏆'};
-  if(p>=50) return{pts:2,emoji:'😊',titulo:'¡Buen trabajo!',desc:'Buen comportamiento general. Con más silencio podríais llegar a 3.',trophy:'🥈'};
-  if(p>=25) return{pts:1,emoji:'😐',titulo:'Podéis mejorar',desc:'Ha habido bastante ruido. La próxima clase podéis hacerlo mejor.',trophy:'🥉'};
-  return{pts:0,emoji:'😞',titulo:'Sin puntos hoy',desc:'Demasiado ruido durante la clase. ¡Mañana nueva oportunidad!',trophy:'😔'};
+  if(p>=75) return{pts:3,titulo:'¡Sobresaliente!',desc:'¡La clase ha trabajado genial! Os habéis ganado los 3 puntos.',trophy:'🏆'};
+  if(p>=50) return{pts:2,titulo:'¡Buen trabajo!',desc:'Buen comportamiento general. Con más silencio podríais llegar a 3.',trophy:'🥈'};
+  if(p>=25) return{pts:1,titulo:'Podéis mejorar',desc:'Ha habido bastante ruido. La próxima clase podéis hacerlo mejor.',trophy:'🥉'};
+  return{pts:0,titulo:'Sin puntos hoy',desc:'Demasiado ruido durante la clase. ¡Mañana nueva oportunidad!',trophy:'😔'};
 }
 
-// ─── BARRA DOJO ───────────────────────
 function actualizarDojo(){
   puntos=Math.max(0,Math.min(100,puntos));
-  const p=puntos;
-  document.getElementById('dojoFill').style.width=p+'%';
-  document.getElementById('dojoFill').style.background=dojoColor(p);
-  document.getElementById('ptsNum').textContent=Math.round(p);
-
-  const r=dojoResult(p);
+  document.getElementById('dojoFill').style.width=puntos+'%';
+  document.getElementById('dojoFill').style.background=dojoColor(puntos);
+  document.getElementById('ptsNum').textContent=Math.round(puntos);
+  const r=dojoResult(puntos);
   [0,1,2,3].forEach(i=>{
     document.getElementById('ley-'+i).classList.toggle('activo',i===r.pts);
     document.getElementById('seg-'+i).classList.toggle('activo',i===r.pts);
   });
 }
 
-// ─── FLOTANTE ─────────────────────────
 function mostrarFlotante(txt,color){
   const el=document.createElement('div');
   el.className='float-anim';
@@ -317,8 +358,6 @@ function mostrarFlotante(txt,color){
   setTimeout(()=>el.remove(),950);
 }
 
-// ─── TICK PUNTOS ──────────────────────
-let lastDelta=0;
 function tickPuntos(){
   if(!activo)return;
   let d=0;
@@ -327,8 +366,6 @@ function tickPuntos(){
   else if(nivelActual===2) d=-DRAIN_NORMAL;
   else if(nivelActual===3) d=-DRAIN_RUIDO;
   else if(nivelActual===4) d=-DRAIN_CRITICO;
-
-  // Flotante solo cuando hay cambio apreciable
   if(Math.abs(d)>=0.4){
     if(d>0) mostrarFlotante('+','#4ade80');
     else    mostrarFlotante('−','#f87171');
@@ -337,7 +374,6 @@ function tickPuntos(){
   actualizarDojo();
 }
 
-// ─── UI SONIDO ────────────────────────
 function getNivel(pct){
   for(let i=niveles.length-1;i>=0;i--) if(pct>=niveles[i].min) return i;
   return 0;
@@ -362,7 +398,6 @@ function actualizarUI(pct){
   }
 }
 
-// ─── AUDIO ────────────────────────────
 function loop(){
   const data=new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(data);
@@ -422,7 +457,6 @@ function resetear(){
   for(let i=0;i<5;i++) document.getElementById('card-'+(i+1)).classList.toggle('activo',i===0);
 }
 
-// ─── MODAL ────────────────────────────
 function mostrarResultado(){
   const r=dojoResult(puntos);
   document.getElementById('mTrophy').textContent=r.trophy;
@@ -436,7 +470,6 @@ function cerrarModal(){
   document.getElementById('modalOverlay').classList.remove('visible');
 }
 
-// Init
 actualizarDojo();
 </script>
 </body>
