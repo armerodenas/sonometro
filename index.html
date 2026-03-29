@@ -5,31 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Sonómetro de Clase</title>
 
-<!-- ═══════════════════════════════════════
-     PWA MANIFEST (embebido)
-═══════════════════════════════════════ -->
-<script>
-const MANIFEST = {
-  name: "Sonómetro de Clase",
-  short_name: "Sonómetro",
-  description: "Sonómetro con puntos ClassDojo para clase de Primaria",
-  start_url: "./",
-  display: "standalone",
-  orientation: "landscape",
-  background_color: "#0f172a",
-  theme_color: "#6366f1",
-  lang: "es",
-  icons: [
-    { src: "icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-    { src: "icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }
-  ]
-};
-const blob = new Blob([JSON.stringify(MANIFEST)], {type:'application/manifest+json'});
-const mUrl = URL.createObjectURL(blob);
-const link = document.createElement('link');
-link.rel='manifest'; link.href=mUrl;
-document.currentScript.parentNode.insertBefore(link, document.currentScript);
-</script>
+<!-- PWA MANIFEST -->
+<link rel="manifest" href="manifest.json">
 
 <!-- PWA meta tags -->
 <meta name="application-name" content="Sonómetro de Clase">
