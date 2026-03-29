@@ -267,7 +267,7 @@
   <div class="sensibilidad-wrap">
     <div class="sens-row">
       <span class="sens-label"><span>🎚️</span> Sensibilidad</span>
-      <input type="range" id="sensSlider" min="20" max="200" value="80" step="5"
+      <input type="range" id="sensSlider" min="20" max="200" value="120" step="5"
         oninput="actualizarSensibilidad(this.value)">
       <span class="sens-value" id="sensVal">Normal</span>
     </div>
@@ -335,19 +335,22 @@ const DRAIN_RUIDO   = 0.7;
 const DRAIN_CRITICO = 1.8;
 
 // ─── SENSIBILIDAD ─────────────────────────────────────────────
-let sensibilidad = 80; // divisor RMS: menor = más sensible
+// slider: 20=poco sensible(divisor alto) → 200=muy sensible(divisor bajo)
+// divisor = 220 - val: val=20→div=200(poco), val=120→div=100(normal), val=200→div=20(mucho)
+let sensibilidad = 100;
 
 function actualizarSensibilidad(val){
-  sensibilidad = Number(val);
-  const pct = ((200 - sensibilidad) / (200 - 20)) * 100; // invertido: 200→0%, 20→100%
+  const v = Number(val);
+  sensibilidad = 220 - v; // invertir: slider derecha = divisor bajo = más sensible
+  const pct = ((v - 20) / (200 - 20)) * 100; // visual: izq=0% der=100%
   const slider = document.getElementById('sensSlider');
   slider.style.background = `linear-gradient(90deg,#6366f1 ${pct}%,rgba(255,255,255,.1) ${pct}%)`;
   let label = 'Normal';
-  if(sensibilidad <= 50)       label = 'Muy alta 🔥';
-  else if(sensibilidad <= 65)  label = 'Alta';
-  else if(sensibilidad <= 95)  label = 'Normal';
-  else if(sensibilidad <= 130) label = 'Baja';
-  else                         label = 'Muy baja';
+  if(v >= 170)      label = 'Muy alta 🔥';
+  else if(v >= 140) label = 'Alta';
+  else if(v >= 100) label = 'Normal';
+  else if(v >= 60)  label = 'Baja';
+  else              label = 'Muy baja';
   document.getElementById('sensVal').textContent = label;
 }
 
@@ -513,7 +516,7 @@ function cerrarModal(){
 }
 
 actualizarDojo();
-actualizarSensibilidad(80);
+actualizarSensibilidad(120);
 </script>
 </body>
 </html>
