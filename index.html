@@ -346,11 +346,11 @@ function actualizarSensibilidad(val){
   const slider = document.getElementById('sensSlider');
   slider.style.background = `linear-gradient(90deg,#6366f1 ${pct}%,rgba(255,255,255,.1) ${pct}%)`;
   let label = 'Normal';
-  if(v >= 170)      label = 'Muy alta 🔥';
-  else if(v >= 140) label = 'Alta';
-  else if(v >= 100) label = 'Normal';
-  else if(v >= 60)  label = 'Baja';
-  else              label = 'Muy baja';
+  if(v <= 50)       label = 'Muy baja';
+  else if(v <= 80)  label = 'Baja';
+  else if(v <= 130) label = 'Normal';
+  else if(v <= 170) label = 'Alta';
+  else              label = 'Muy alta 🔥';
   document.getElementById('sensVal').textContent = label;
 }
 
